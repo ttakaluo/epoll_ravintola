@@ -1,4 +1,4 @@
 client
-socket_server
+server
 *.swp
 *.o

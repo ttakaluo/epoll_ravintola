@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS= -Wall -I.
-EXE_NAME = socket_server
-FILES = print_error.o talk_to_client.o fifod.o make_socket_non_blocking.o main.o
+EXE_NAME = server
+FILES = print_error.o talk_to_client.o create_and_bind_socket.o make_socket_non_blocking.o main.o
 LIBS = -lpthread
 all: $(FILES)
 	$(CC) -o $(EXE_NAME) $(FILES) $(CFLAGS) $(LIBS)

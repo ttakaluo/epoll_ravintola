@@ -5,8 +5,7 @@ void * talk_to_client(void * arg);
 
 struct arg_struct {
 
-	int newsockfd;
-	int logfile;
+	int conn_socket;
 	pthread_key_t thr_id_key;
 	int * thread_id;
 };
