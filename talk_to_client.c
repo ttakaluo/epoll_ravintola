@@ -19,21 +19,30 @@ void * talk_to_client(void * arguments){
 	int n;
 	int thread_id = *(args -> thread_id);
 
-	pthread_setspecific(args -> thr_id_key, args -> thread_id);
+	//pthread_setspecific(args -> thr_id_key, args -> thread_id);
 	
 	int done = 0;
+	int fail = 1;
       do{
       	n = read(args -> conn_socket, buffer, sizeof(buffer));
 
  
 		if (n == 0){
-			done = 1;
+			done = 0;
       		break;      //return to main loop now
 		}
 		else if (n == -1){
       		//if errno is EAGAIN, we have read all data, return to main loop
+			if (errno == EBADF){
+				fprintf(stderr, "EBADF.\n");
+				fail = 0;
+				done = 1;
+				break;
+			}
       		if (errno != EAGAIN){
-				perror("Read in process data failed");
+				fprintf(stderr, "Value of errno: %d\n", errno);
+      			fprintf(stderr, "Error occured: %s\n", strerror(errno));
+				break;
 			}
 			//printf("I have read everything!\n");
 			done = 1;
@@ -41,11 +50,25 @@ void * talk_to_client(void * arguments){
 		}	
       }
       while (!done);
+
+	if(fail){
 	
-	printf("Client[%d] said this: %s\n", thread_id, buffer);
+		printf("Client[%d] said this: %s\n", thread_id, buffer);
+
+		char reply[]="Ok\n";
+
+		size_t len;
+		len = strlen(reply) + 1;
+
+		if (write(args -> conn_socket, reply, len) != len) {
+
+            	      fprintf(stderr, "partial/failed write at server\n");
+                  	exit(EXIT_FAILURE);
+            	}
+	}
 
 	//closing the descriptor makes epoll remove it from the monitored set
-	printf("Closed connection to connecting socket: %d\n", args -> conn_socket);
+	//printf("Closed connection to connecting socket: %d\n", args -> conn_socket);
 
       close(args -> conn_socket);
       //write(args -> logfile, buffer, strlen(buffer));

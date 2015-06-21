@@ -78,20 +78,24 @@ int main(int argc, char *argv[]){
     //	epoll_data_t data;      /* User data variable */
     //	};
 
-	event.events = EPOLLIN;
+	event.events = EPOLLIN|EPOLLET;
 	event.data.fd = listen_socket;
 
 	if (epoll_ctl (epollfd, EPOLL_CTL_ADD, listen_socket, &event) == -1)
 		error ("epoll_ctl fail");
 	
+	int count = 0;
+	
 	while(1){
 		
-		printf("Waiting for connections....\n");
-
+		//printf("Waiting for connections[%d]....\n", count);
+		
 		if((nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1)) == -1)    //Returns number of events waiting
 			error("epoll_pwait");
 
 		for (i = 0; i < nfds; i++){
+			count++;
+			printf("Process connection [%d]\n", count);
 
 			if (events[i].data.fd == listen_socket) {
 
@@ -101,7 +105,7 @@ int main(int argc, char *argv[]){
 				if (make_socket_non_blocking(conn_socket) == -1)
 					error("Error in setting non_block");
 			
-				event.events = EPOLLIN | EPOLLET;
+				event.events = EPOLLIN|EPOLLET;
 				event.data.fd = conn_socket;
 
 				if ((epoll_ctl(epollfd, EPOLL_CTL_ADD, conn_socket, &event)) == -1)
