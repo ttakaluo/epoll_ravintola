@@ -39,9 +39,11 @@ void * talk_to_client(void * arguments){
 				done = 1;
 				break;
 			}
-      		if (errno != EAGAIN){
+      		else if (errno != EAGAIN){
 				fprintf(stderr, "Value of errno: %d\n", errno);
       			fprintf(stderr, "Error occured: %s\n", strerror(errno));
+				fail = 0;
+				done = 1;
 				break;
 			}
 			//printf("I have read everything!\n");
